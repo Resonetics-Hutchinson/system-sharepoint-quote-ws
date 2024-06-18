@@ -1,0 +1,104 @@
+{
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#sites('resoneticsllc.sharepoint.com%2C2109c857-53be-4b12-8f52-db69143da055%2Cce8531e0-caba-45ce-8d13-0bd32eec2509')/sites('resoneticsllc.sharepoint.com%2C2109c857-53be-4b12-8f52-db69143da055%2C799f37d9-1df9-4122-a62b-d3c1102a95cc')/lists('7cfa244e-75be-493d-bef3-e141742c1078')/items",
+    "value": [
+        {
+            "@odata.etag": "\"d589448c-a556-4d53-aca7-6b5834dfe6ce,2\"",
+            "createdDateTime": "2023-12-04T03:44:11Z",
+            "eTag": "\"d589448c-a556-4d53-aca7-6b5834dfe6ce,2\"",
+            "id": "1",
+            "lastModifiedDateTime": "2023-12-04T18:49:49Z",
+            "webUrl": "https://resoneticsllc.sharepoint.com/sites/DevTest/Kettering/Lists/SF%20TestJobs/1_.000",
+            "createdBy": {
+                "user": {
+                    "email": "nborton@resonetics.com",
+                    "id": "0c0dab2a-7ff3-4d1a-aa9e-a7aa7414b7f1",
+                    "displayName": "Nick Borton"
+                }
+            },
+            "lastModifiedBy": {
+                "user": {
+                    "email": "byron.rivera@torrentconsulting.com",
+                    "id": "c4edf71b-7796-4466-92bb-1322978ee155",
+                    "displayName": "byron.rivera"
+                }
+            },
+            "parentReference": {
+                "id": "468b6345-1a76-463a-a987-9cd06103b093",
+                "siteId": "resoneticsllc.sharepoint.com,2109c857-53be-4b12-8f52-db69143da055,799f37d9-1df9-4122-a62b-d3c1102a95cc"
+            },
+            "contentType": {
+                "id": "0x010021E316EBEF8CF749A7C3858C8C8670A8",
+                "name": "Item"
+            },
+            "fields@odata.context": "https://graph.microsoft.com/v1.0/$metadata#sites('resoneticsllc.sharepoint.com%2C2109c857-53be-4b12-8f52-db69143da055%2Cce8531e0-caba-45ce-8d13-0bd32eec2509')/sites('resoneticsllc.sharepoint.com%2C2109c857-53be-4b12-8f52-db69143da055%2C799f37d9-1df9-4122-a62b-d3c1102a95cc')/lists('7cfa244e-75be-493d-bef3-e141742c1078')/items('1')/fields/$entity",
+           "fields": {
+                "@odata.etag": "\"6aef1eba-513e-41ae-a104-6f47d8e2f12d,45\"",
+                "ContentType": "Item",
+                "Title": "373",
+                "LinkTitleNoMenu": "373",
+                "LinkTitle": "373",
+                "Customer": "Benjamin Inc",
+                "Customer_x0020_Level": "High",
+                "Project": "Benji",
+                "Part_x0020_Number": "2435342",
+                "Job_x0020_Status": "Pending",
+                "Job_x0020_Description": "Part for mass spectrometer",
+                "Part_x0020_Number_x0020_Descript": "Number for Spectrometry",
+                "Part_x0020_Number_x0020_Rev": "ff",
+                "Drawing": "Drawing example",
+                "Drawing_x0020_Rev": "Drawing Rev",
+                "SO_x0020_Number": "83838",
+                "SO_x0020_On_x0020_Hold": true,
+                "PO_x0020_Number": "PO-00029292",
+                "PO_x0020_Date": "2023-12-15T08:00:00Z",
+                "International_x0020_Ship": false,
+                "Order_x0020_Amount": 1132.0,
+                "Open_x0020_Amount": 4234.0,
+                "Order_x0020_Qty": 3.0,
+                "Open_x0020_Qty": 5.0,
+                "Unit_x0020_Price": 55.0,
+                "Misc_x0020_Charge": 55.0,
+                "Promise_x0020_Date": "2023-12-15T08:00:00Z",
+                "BDM": "5553",
+                "Account_x0020_Manager": "Lisa Logan",
+                "Account_x0020_Manger_x0020_Email": "lisa.logan@torrentconsulting.com",
+                "EngineerLookupId": "138",
+                "Product_x0020_Group": "Trees",
+                "Job_x0020_Type": "Birds",
+                "Notes": "This is a list with all fields completed",
+                "Reason_x0020_Job_x0020_Late": "Laser Down",
+                "CofC_x0020_Details": "Laser down",
+                "CofC_x0020_File_x0020_Name": "c:\\FileName",
+                "CofC_x0020_Qty": 44.0,
+                "Customer_x0020_Address": "63636 Woodcote",
+                "Customer_x0020_City": "Towanda",
+                "Customer_x0020_State": "Pa",
+                "Customer_x0020_Postal_x0020_Code": "18848",
+                "Customer_x0020_Country": "USA",
+                "Quote_x0020_Number": "QO-93938",
+                "SO_x0020_Line": "4",
+                "SO_x0020_Release": "Four",
+                "Company": "Dupont",
+                "PPTID": 737373.0,
+                "Location": "Kettering",
+                "Job_x0020_Created_x0020_Date": "2023-12-08T08:00:00Z",
+                "Job_x0020_Closed_x0020_Date": "2023-12-25T08:00:00Z",
+                "Waiting_x0020_On_x0020_Material": "Yes",
+                "id": "2",
+                "Modified": "2023-12-08T19:32:53Z",
+                "Created": "2023-12-07T21:33:15Z",
+                "AuthorLookupId": "357",
+                "EditorLookupId": "357",
+                "_UIVersionString": "45.0",
+                "Attachments": false,
+                "Edit": "",
+                "ItemChildCount": "0",
+                "FolderChildCount": "0",
+                "_ComplianceFlags": "",
+                "_ComplianceTag": "",
+                "_ComplianceTagWrittenTime": "",
+                "_ComplianceTagUserId": ""
+            }
+        }
+    ]
+}

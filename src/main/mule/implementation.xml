@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:oauth="http://www.mulesoft.org/schema/mule/oauth"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/oauth http://www.mulesoft.org/schema/mule/oauth/current/mule-oauth.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="f20d0ae1-14b9-440c-b736-a569c4387aa3" >
+		<http:request-connection protocol="HTTPS" port="${sp.port}" host="${sp.host}">
+			<http:authentication >
+				<oauth:client-credentials-grant-type clientId="${sp.clientId}" clientSecret="${sp.clientSecret}" scopes="${sp.scopes}" tokenUrl="${sp.tokenURL}" />
+			</http:authentication>
+		</http:request-connection>
+	</http:request-config>
+	<flow name="createQuoteFlow" doc:id="5c86c123-d298-4581-a3b0-ca46493a28a2" >
+		<logger level="INFO" doc:name="Logger" doc:id="9aaa8864-975a-4ed8-854b-391a250843ae" message="******** createQuoteFlow ********"/>
+		<logger level="INFO" doc:name="Logger" doc:id="2dfc47cb-66c3-4f84-99f5-445ecc27ccea" message="#[payload]"/>
+		<http:request method="POST" doc:name="Request" doc:id="59ea23d3-2f24-4754-a61c-d6b1e096f92b" config-ref="HTTP_Request_configuration" outputMimeType="application/json" path="#[p('sp.requestPath')]">
+		</http:request>
+		<logger level="INFO" doc:name="Logger" doc:id="07ee1f1f-b0be-463a-a103-c97c678c18d7" message="#[payload]"/>
+	</flow>
+	<flow name="updateQuoteFlow" doc:id="c5d1de3c-0e8b-47fa-89d5-39b3ea85359c" >
+		<http:request method="PATCH" doc:name="Request" doc:id="82c9280e-2cab-4f53-bc53-1be827630cc5" config-ref="HTTP_Request_configuration" path="#[p('sp.requestPath')++&quot;/&quot;++ attributes.uriParams.QuoteId as String ++&quot;/fields&quot;]" outputMimeType="application/json" sendBodyMode="ALWAYS"/>
+		<logger level="INFO" doc:name="Logger" doc:id="9a7b2686-7a2b-41e5-b02b-345a44390da2" message="#[attributes.uriParams.QuoteId]"/>
+	</flow>
+	<flow name="getUpdatedQuotesFlow" doc:id="683f1864-594a-42ba-8eee-e766eb10159f" >
+		<logger level="INFO" doc:name="Logger" doc:id="91551fba-5fb1-4896-8a42-aa0f64a80d13" message="#[attributes.uriParams.'ModifiedDate']"/>
+		<ee:transform doc:name="Transform Message" doc:id="7a8c48a3-2597-4960-981c-4c6c7f067998">
+			<ee:message>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="query" ><![CDATA[%dw 2.0
+output application/json
+var startDateTime = ((attributes.queryParams.startDateTime default now()) as String)
+var endDateTime = ((attributes.queryParams.endDateTime default now()) as String)
+---
+if(!isEmpty(attributes.queryParams.endDateTime)) {
+    "filter":"fields/Modified ge '" ++ startDateTime ++"' and fields/Modified le '" ++ endDateTime ++"'"
+} else {
+	"filter" : "fields/Modified ge '" ++ startDateTime ++"'"
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<http:request method="GET" doc:name="Request" doc:id="96446bc0-88ca-4679-b91f-d39228ab30fc" config-ref="HTTP_Request_configuration" path="#[p('sp.requestPath')]">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Prefer" : "allowthrottleablequeries"
+}]]]></http:headers>
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"filter" : vars.query.filter,
+	"expand" : "fields"
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="10723eba-22bb-40ab-bea7-67bbbd67e9b7" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.value map ( value , indexOfValue ) -> {
+	PO_x0020_Number: value.fields.PO_x0020_Number,
+	Customer: value.fields.Customer,
+	Quote_x0020_Status: value.fields.Quote_x0020_Status,
+	CustomerID: value.fields.CustomerID,
+	Customer_x0020_POC_x0020_ID: value.fields.Customer_x0020_POC_x0020_ID,
+	Customer_x0020_POC_x0020_Phone: value.fields.Customer_x0020_POC_x0020_Phone,
+	Deliverables1_x002d_10: value.fields.Deliverables1_x002d_10,
+	Project: value.fields.Project,
+	Id: value.id,
+	Customer_x0020_POC_x0020_Email: value.fields.Customer_x0020_POC_x0020_Email,
+	Part_x0020_Number_x0020_Descript: value.fields.Part_x0020_Number_x0020_Descript,
+	RFQ_x0020_Date: value.fields.RFQ_x0020_Date,
+	Customer_x0020_County: value.fields.Customer_x0020_County,
+	Customer_x0020_Level: value.fields.Customer_x0020_Level,
+	Account_x0020_Manager_x0020_Email: value.fields.Account_x0020_Manager_x0020_Emai,
+	MultSiteQuote: value.fields.MultSiteQuote,
+	Deliverables1_x002d_4: value.fields.Deliverables1_x002d_4,
+	Deliverables1_x002d_3: value.fields.Deliverables1_x002d_3,
+	BDM: value.fields.BDM,
+	Deliverables1_x002d_6: value.fields.Deliverables1_x002d_6,
+	Deliverables1_x002d_5: value.fields.Deliverables1_x002d_5,
+	Deliverables1_x002d_2: value.fields.Deliverables1_x002d_2,
+	Deliverables1_x002d_1: value.fields.Deliverables1_x002d_1,
+	USDQuoteAmt: value.fields.USDQuoteAmt,
+	Quote_x0020_Number: value.fields.Quote_x0020_Number,
+	Drawing_x0020_Number_x0020_Rev: value.fields.Drawing_x0020_Number_x0020_Rev,
+	Assumption1: value.fields.Assumption1,
+	Part_x0020_Number: value.fields.Part_x0020_Number,
+	BDM_x0020_Email: value.fields.BDM_x0020_Email,
+	SO_x0020_Amount: value.fields.SO_x0020_Amount,
+	UnitPrice1_x002d_9: value.fields.UnitPrice1_x002d_9,
+	Material_x0020_Supplier: value.fields.Material_x0020_Supplier,
+	UnitPrice1_x002d_8: value.fields.UnitPrice1_x002d_8,
+	Dev_x0020_Start_x0020_Date: value.fields.Dev_x0020_Start_x0020_Date,
+	Drawing_x0020_Number: value.fields.Drawing_x0020_Number,
+	Deliverables1_x002d_8: value.fields.Deliverables1_x002d_8,
+	Deliverables1_x002d_7: value.fields.Deliverables1_x002d_7,
+	Deliverables1_x002d_9: value.fields.Deliverables1_x002d_9,
+	Dev_x0020_Quote_x0020_Date: value.fields.Dev_x0020_Quote_x0020_Date,
+	UnitPrice1_x002d_7: value.fields.UnitPrice1_x002d_7,
+	UnitPrice1_x002d_6: value.fields.UnitPrice1_x002d_6,
+	UnitPrice1_x002d_5: value.fields.UnitPrice1_x002d_5,
+	UnitPrice1_x002d_4: value.fields.UnitPrice1_x002d_4,
+	UnitPrice1_x002d_3: value.fields.UnitPrice1_x002d_3,
+	UnitPrice1_x002d_2: value.fields.UnitPrice1_x002d_2,
+	UnitPrice1_x002d_1: value.fields.UnitPrice1_x002d_1,
+	Quote_x0020_Amount: value.fields.Quote_x0020_Amount,
+	Account_x0020_Manager_x0020_Phone: value.fields.Account_x0020_Manager_x0020_Phon,
+	Qty1_x002d_9: value.fields.Qty1_x002d_9,
+	SalesForceID: value.fields.SalesForceID,
+	Quote_x0020_Delay: value.fields.Quote_x0020_Delay,
+	Opportunity_x0020_Market: value.fields.Opportunity_x0020_Market,
+	MultSiteType: value.fields.MultSiteType,
+	Customer_x0020_POC: value.fields.Customer_x0020_POC,
+	Account_x0020_Manager: value.fields.Account_x0020_Manager,
+	UnitPrice1_x002d_10: value.fields.UnitPrice1_x002d_10,
+	Part_x0020_Number2: value.fields.Part_x0020_Number2,
+	Part_x0020_Number_x0020_Descript0: value.fields.Part_x0020_Number_x0020_Descript0,
+	Part_x0020_Number_x0020_Rev2: value.fields.Part_x0020_Number_x0020_Rev2,
+	Drawing_x0020_Number2: value.fields.Drawing_x0020_Number2,
+	Drawing_x0020_Number_x0020_Rev2: value.fields.Drawing_x0020_Number_x0020_Rev2,
+	Assumption2: value.fields.Assumption2,
+	Deliverables2_x002d_1: value.fields.Deliverables2_x002d_1,
+	Deliverables2_x002d_2: value.fields.Deliverables2_x002d_2,
+	Deliverables2_x002d_3: value.fields.Deliverables2_x002d_3,
+	Deliverables2_x002d_4: value.fields.Deliverables2_x002d_4,
+	Deliverables2_x002d_5: value.fields.Deliverables2_x002d_5,
+	Deliverables2_x002d_6: value.fields.Deliverables2_x002d_6,
+	Deliverables2_x002d_7: value.fields.Deliverables2_x002d_7,
+	Deliverables2_x002d_8: value.fields.Deliverables2_x002d_8,
+	Deliverables2_x002d_9: value.fields.Deliverables2_x002d_9,
+	Deliverables2_x002d_10: value.fields.Deliverables2_x002d_10,
+	LeadTime2_x002d_1: value.fields.LeadTime2_x002d_1,
+	LeadTime2_x002d_2: value.fields.LeadTime2_x002d_2,
+	LeadTime2_x002d_3: value.fields.LeadTime2_x002d_3,
+	LeadTime2_x002d_4: value.fields.LeadTime2_x002d_4,
+	LeadTime2_x002d_5: value.fields.LeadTime2_x002d_5,
+	LeadTime2_x002d_6: value.fields.LeadTime2_x002d_6,
+	LeadTime2_x002d_7: value.fields.LeadTime2_x002d_7,
+	LeadTime2_x002d_8: value.fields.LeadTime2_x002d_8,
+	LeadTime2_x002d_9: value.fields.LeadTime2_x002d_9,
+	LeadTime2_x002d_10: value.fields.LeadTime2_x002d_10,
+	Qty2_x002d_1: value.fields.Qty2_x002d_1,
+	Qty2_x002d_2: value.fields.Qty2_x002d_2,
+	Qty2_x002d_3: value.fields.Qty2_x002d_3,
+	Qty2_x002d_4: value.fields.Qty2_x002d_4,
+	Qty2_x002d_5: value.fields.Qty2_x002d_5,
+	Qty2_x002d_6: value.fields.Qty2_x002d_6,
+	Qty2_x002d_7: value.fields.Qty2_x002d_7,
+	Qty2_x002d_8: value.fields.Qty2_x002d_8,
+	Qty2_x002d_9: value.fields.Qty2_x002d_9,
+	Qty2_x002d_10: value.fields.Qty2_x002d_10,
+	UnitPrice2_x002d_1: value.fields.UnitPrice2_x002d_1,
+	UnitPrice2_x002d_2: value.fields.UnitPrice2_x002d_2,
+	UnitPrice2_x002d_3: value.fields.UnitPrice2_x002d_3,
+	UnitPrice2_x002d_4: value.fields.UnitPrice2_x002d_4,
+	UnitPrice2_x002d_5: value.fields.UnitPrice2_x002d_5,
+	UnitPrice2_x002d_6: value.fields.UnitPrice2_x002d_6,
+	UnitPrice2_x002d_7: value.fields.UnitPrice2_x002d_7,
+	UnitPrice2_x002d_8: value.fields.UnitPrice2_x002d_8,
+	UnitPrice2_x002d_9: value.fields.UnitPrice2_x002d_9,
+	UnitPrice2_x002d_10: value.fields.UnitPrice2_x002d_10,
+	Quote_x0020_Type: value.fields.Quote_x0020_Type,
+	MSLocation5: value.fields.MSLocation5,
+	MSLocation4: value.fields.MSLocation4,
+	MSLocation3: value.fields.MSLocation3,
+	MSLocation2: value.fields.MSLocation2,
+	MSLocation1: value.fields.MSLocation1,
+	LeadTime1_x002d_10: value.fields.LeadTime1_x002d_10,
+	Customer_x0020_Address2: value.fields.Customer_x0020_Address2,
+	Customer_x0020_Address3: value.fields.Customer_x0020_Address3,
+	Customer_x0020_City: value.fields.Customer_x0020_City,
+	ProjectID: value.fields.ProjectID,
+	Customer_x0020_Zip_x0020_Code: value.fields.Customer_x0020_Zip_x0020_Code,
+	Engineer: value.fields.EngineerLookupId,
+	Customer_x0020_Address: value.fields.Customer_x0020_Address,
+	Customer_x0020_Terms: value.fields.Customer_x0020_Terms,
+	Quote_x0020_Date: value.fields.Quote_x0020_Date,
+	Notes: value.fields.Notes,
+	LabVisit: value.fields.LabVisit,
+	LeadTime1_x002d_9: value.fields.LeadTime1_x002d_9,
+	Customer_x0020_State: value.fields.Customer_x0020_State,
+	LeadTime1_x002d_8: value.fields.LeadTime1_x002d_8,
+	LeadTime1_x002d_7: value.fields.LeadTime1_x002d_7,
+	LeadTime1_x002d_6: value.fields.LeadTime1_x002d_6,
+	MSTask5: value.fields.MSTask5,
+	LeadTime1_x002d_5: value.fields.LeadTime1_x002d_5,
+	MSTask4: value.fields.MSTask4,
+	LeadTime1_x002d_4: value.fields.LeadTime1_x002d_4,
+	MSTask3: value.fields.MSTask3,
+	LeadTime1_x002d_3: value.fields.LeadTime1_x002d_3,
+	Qty1_x002d_10: value.fields.Qty1_x002d_10,
+	MSTask2: value.fields.MSTask2,
+	Title: value.fields.Title,
+	LeadTime1_x002d_2: value.fields.LeadTime1_x002d_2,
+	MSTask1: value.fields.MSTask1,
+	LeadTime1_x002d_1: value.fields.LeadTime1_x002d_1,
+	SO_x0020_Number: value.fields.SO_x0020_Number,
+	Qty1_x002d_7: value.fields.Qty1_x002d_7,
+	MSQuoteID3: value.fields.MSQuoteID3,
+	Qty1_x002d_8: value.fields.Qty1_x002d_8,
+	MSQuoteID4: value.fields.MSQuoteID4,
+	Qty1_x002d_5: value.fields.Qty1_x002d_5,
+	MSQuoteID1: value.fields.MSQuoteID1,
+	Qty1_x002d_6: value.fields.Qty1_x002d_6,
+	MSQuoteID2: value.fields.MSQuoteID2,
+	Qty1_x002d_3: value.fields.Qty1_x002d_3,
+	Qty1_x002d_4: value.fields.Qty1_x002d_4,
+	Part_x0020_Number_x0020_Rev: value.fields.Part_x0020_Number_x0020_Rev,
+	Qty1_x002d_1: value.fields.Qty1_x002d_1,
+	MSQuoteID5: value.fields.MSQuoteID5,
+	Business_x0020_Unit: value.fields.Business_x0020_Unit,
+	Qty1_x002d_2: value.fields.Qty1_x002d_2,
+	Product_x0020_Group: value.fields.Product_x0020_Group,
+	Customer_x0020_Quote_x0020_Sent: value.fields.Customer_x0020_Quote_x0020_Sent,
+	Discipline: value.fields.Discipline,
+	Material_x0020_Type : value.fields.Material_x0020_Type,
+    Customer_x0020_Quote_x0020_Sent: value.fields.Customer_x0020_Quote_x0020_Sent,
+    Account_x0020_Type: value.fields.Account_x0020_Type
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="20a0c009-2143-4e38-9e1d-492fa501ced5" message="#[payload]"/>
+	
+</flow>
+	<flow name="getUpdatedJobsFlow" doc:id="ac2130fb-a889-4e6f-9661-24148c8c0ac8" >
+		<http:request method="GET" doc:name="Request" doc:id="42511372-d554-4320-a068-385777956d7d" config-ref="HTTP_Request_configuration" path="#[p('sp.requestPathJobs')]">
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"expand" : "fields"
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="768ca7eb-43d6-465f-ad2c-b97f00ee56a0" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.value map ( value , indexOfValue ) -> {
+			Title: value.fields.Title,
+			Customer: value.fields.Customer,
+			Customer_x0020_Level: value.fields.Customer_x0020_Level,
+			Project: value.fields.Project,
+			Part_x0020_Number: value.fields.Part_x0020_Number,
+			Job_x0020_Status: value.fields.Job_x0020_Status,
+			Job_x0020_Description: value.fields.Job_x0020_Description,
+			Part_x0020_Number_x0020_Descript: value.fields.Part_x0020_Number_x0020_Descript,
+			Part_x0020_Number_x0020_Rev: value.fields.Part_x0020_Number_x0020_Rev,
+			Drawing: value.fields.Drawing,
+			Drawing_x0020_Rev: value.fields.Drawing_x0020_Rev,
+			SO_x0020_Number: value.fields.SO_x0020_Number,
+			SO_x0020_On_x0020_Hold: value.fields.SO_x0020_On_x0020_Hold,
+			PO_x0020_Number: value.fields.PO_x0020_Number,
+			PO_x0020_Date: value.fields.PO_x0020_Date,
+			International_x0020_Ship: value.fields.International_x0020_Ship,
+			Order_x0020_Amount: value.fields.Order_x0020_Amount,
+			Open_x0020_Amount: value.fields.Open_x0020_Amount,
+			Order_x0020_Qty: value.fields.Order_x0020_Qty,
+			Open_x0020_Qty: value.fields.Open_x0020_Qty,
+			Unit_x0020_Price: value.fields.Unit_x0020_Price,
+			Misc_x0020_Charge: value.fields.Misc_x0020_Charge,
+			Promise_x0020_Date: value.fields.Promise_x0020_Date,
+			BDM: value.fields.BDM,
+			Account_x0020_Manager: value.fields.Account_x0020_Manager,
+			Account_x0020_Manger_x0020_Email: value.fields.Account_x0020_Manger_x0020_Email,
+			EngineerLookupId: value.fields.EngineerLookupId,
+			Product_x0020_Group: value.fields.Product_x0020_Group,
+			Job_x0020_Type: value.fields.Job_x0020_Type,
+			Notes: value.fields.Notes,
+			Reason_x0020_Job_x0020_Late: value.fields.Reason_x0020_Job_x0020_Late,
+			CofC_x0020_Details: value.fields.CofC_x0020_Details,
+			CofC_x0020_File_x0020_Name: value.fields.CofC_x0020_File_x0020_Name,
+			CofC_x0020_Qty: value.fields.CofC_x0020_Qty,
+			Customer_x0020_Address: value.fields.Customer_x0020_Address,
+			Customer_x0020_City: value.fields.Customer_x0020_City,
+			Customer_x0020_State: value.fields.Customer_x0020_State,
+			Customer_x0020_Postal_x0020_Code: value.fields.Customer_x0020_Postal_x0020_Code,
+			Customer_x0020_Country: value.fields.Customer_x0020_Country,
+			Quote_x0020_Number: value.fields.Quote_x0020_Number,
+			SO_x0020_Line: value.fields.SO_x0020_Line,
+			SO_x0020_Release: value.fields.SO_x0020_Release,
+			Company: value.fields.Company,
+			PPTID: value.fields.PPTID,
+			Location: value.fields.Location,
+			Job_x0020_Created_x0020_Date: value.fields.Job_x0020_Created_x0020_Date,
+			Job_x0020_Closed_x0020_Date: value.fields.Job_x0020_Closed_x0020_Date,
+			Waiting_x0020_On_x0020_Material: value.fields.Waiting_x0020_On_x0020_Material,
+			id: value.fields.id,
+			Modified: value.fields.Modified,
+			Created: value.fields.Created
+} ]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
