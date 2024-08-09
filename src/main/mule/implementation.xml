@@ -219,7 +219,8 @@ payload.value map ( value , indexOfValue ) -> {
 	Discipline: value.fields.Discipline,
 	Material_x0020_Type : value.fields.Material_x0020_Type,
     Customer_x0020_Quote_x0020_Sent: value.fields.Customer_x0020_Quote_x0020_Sent,
-    Account_x0020_Type: value.fields.Account_x0020_Type
+    Account_x0020_Type: value.fields.Account_x0020_Type,
+    ReQuoteReasonDetails: value.fields.ReQuoteReasonDetails
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
